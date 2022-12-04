@@ -1,0 +1,16 @@
+{
+  "name": "vanilla-nodejs-api",
+  "version": "1.0.0",
+  "description": "A simple Node.js Todo API",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app",
+    "dev": "nodemon app"
+  },
+  "keywords": [],
+  "author": "Khalid Saifullah Fuad",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
