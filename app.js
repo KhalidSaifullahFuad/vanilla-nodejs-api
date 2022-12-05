@@ -1,12 +1,19 @@
 // Dependencies
 const http = require("http");
+
 const Todo = require("./controller");
+const { getRequestBody } = require("./utils");
+
+// Constants
 const PORT = process.env.PORT || 3000;
+const CONTENT_TYPE_JSON = { "Content-Type": "application/json" };
 
 // HTTP Server
 const server = http.createServer((request, response) => {
+	const todo = new Todo();
+
 	if (["/", "/api"].includes(request.url) && request.method === "GET") {
-		response.writeHead(200, { "Content-Type": "application/json" });
+		response.writeHead(200, CONTENT_TYPE_JSON);
 		response.end(
 			JSON.stringify({
 				info: "Vanilla Node.js Todo API",
@@ -19,25 +26,31 @@ const server = http.createServer((request, response) => {
 
 	// getAll - /api/todo : GET
 	else if (request.url == "/api/todo" && request.method === "GET") {
-		new Todo().getTodos().then((todos) => {
-			response.writeHead(200, { "Content-Type": "application/json" });
+		todo.getTodos().then((todos) => {
+			response.writeHead(200, CONTENT_TYPE_JSON);
 			response.end(JSON.stringify(todos));
 		});
 	}
 
 	// getById - /api/todo/:id : GET
-	else if (request.url.match(/\/api\/todo\/(\d+)/) && request.method === "GET") {
+	else if (request.url.match(/\/api\/todo\/(\d+)/) &&	request.method === "GET") {
 		const id = request.url.split("/")[3];
-		new Todo().getTodoById(id).then((todo) => {
-			response.writeHead(200, { "Content-Type": "application/json" });
-			response.end(JSON.stringify(todo));
-		});
+
+		todo.getTodoById(id)
+			.then((todo) => {
+				response.writeHead(200, CONTENT_TYPE_JSON);
+				response.end(JSON.stringify(todo));
+			})
+			.catch((err) => {
+				response.writeHead(404, CONTENT_TYPE_JSON);
+				response.end(JSON.stringify(err));
+			});
 	}
 
 	// create - /api/todo : POST
 	else if (request.url == "/api/todo" && request.method === "POST") {
-		new Todo().createTodo().then((todo) => {
-			response.writeHead(201, { "Content-Type": "application/json" });
+		todo.createTodo().then((todo) => {
+			response.writeHead(201, CONTENT_TYPE_JSON);
 			response.end(JSON.stringify(todo));
 		});
 	}
@@ -53,27 +66,36 @@ const server = http.createServer((request, response) => {
 			.on("end", () => {
 				const { id, title, completed, date } = JSON.parse(body);
 				const todo = { id: parseInt(id), title, completed, date };
-				new Todo().updateTodo(todo).then((todo) => {
-					response.writeHead(200, {
-						"Content-Type": "application/json",
+				new Todo()
+					.updateTodo(todo)
+					.then((todo) => {
+						response.writeHead(200, CONTENT_TYPE_JSON);
+						response.end(JSON.stringify(todo));
+					})
+					.catch((err) => {
+						response.writeHead(404, CONTENT_TYPE_JSON);
+						response.end(JSON.stringify(err));
 					});
-					response.end(JSON.stringify(todo));
-				});
 			});
 	}
 
 	// delete - /api/todo/:id : DELETE
 	else if (request.url.match(/\/api\/todo\/(\d+)/) && request.method === "DELETE") {
 		const id = request.url.split("/")[3];
-		new Todo().deleteTodoById(id).then((message) => {
-			response.writeHead(200, { "Content-Type": "application/json" });
-			response.end(JSON.stringify(message));
-		});
+		todo.deleteTodoById(id)
+			.then((message) => {
+				response.writeHead(200, CONTENT_TYPE_JSON);
+				response.end(JSON.stringify(message));
+			})
+			.catch((err) => {
+				response.writeHead(404, CONTENT_TYPE_JSON);
+				response.end(JSON.stringify(err));
+			});
 	}
 
 	// /help : GET
 	else if (request.url == "/help" && request.method === "GET") {
-		response.writeHead(200, { "Content-Type": "application/json" });
+		response.writeHead(200, CONTENT_TYPE_JSON);
 		response.end(
 			JSON.stringify({
 				"GET - /api/todo": "get all todos",
@@ -88,7 +110,7 @@ const server = http.createServer((request, response) => {
 
 	// 404
 	else {
-		response.writeHead(404, { "Content-Type": "application/json" });
+		response.writeHead(404, CONTENT_TYPE_JSON);
 		response.end(
 			JSON.stringify({
 				message: "Enter a valid endpoint and request method",
