@@ -1,3 +1,4 @@
+// Dependencies
 const fs = require("fs");
 
 const data = require("./data.json");
@@ -21,11 +22,20 @@ class Controller {
 
 	// store
 	createTodo(todo) {
-		return new Promise((resolve) => {
+		return new Promise((resolve, reject) => {
+			const { title } = todo;
 			const id = data.reduce((max, todo) => Math.max(max, todo.id), 0) + 1;
-			const newTodo = { id, ...todo };
+			const completed = false;
+			const date = new Date().toISOString().slice(0, 10);
+			const newTodo = { id, title, completed, date };
+
+			if(!title){
+				return reject({ message: `Todo title is required` });
+			}
+
 			data.push(newTodo);
 			fs.writeFileSync("./data.json", JSON.stringify(data));
+
 			resolve(newTodo);
 		});
 	}
@@ -34,12 +44,20 @@ class Controller {
 	updateTodo(todo) {
 		return new Promise((resolve, reject) => {
 			const index = data.findIndex((item) => item.id === todo.id);
+			const date = new Date().toISOString().slice(0, 10);
+
 			if (index === -1) {
 				return reject({ message: `Todo with id ${todo.id} not found` });
 			}
-			data[index] = todo;
 
-			fs.writeFileSync("./data.json", JSON.stringify(data));
+			if(!todo.title) {
+				return reject({ message: `Todo title is required` });
+			}
+			data[index].title = todo.title;
+			data[index].completed = todo.completed || data[index].completed;
+			data[index].date = date;
+
+			fs.writeFileSync("./data.json", JSON.stringify(data[index]));
 
 			resolve(todo);
 		});

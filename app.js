@@ -49,34 +49,38 @@ const server = http.createServer((request, response) => {
 
 	// create - /api/todo : POST
 	else if (request.url == "/api/todo" && request.method === "POST") {
-		todo.createTodo().then((todo) => {
-			response.writeHead(201, CONTENT_TYPE_JSON);
-			response.end(JSON.stringify(todo));
+		getRequestBody(request).then((todoData) => {
+			todo.createTodo(todoData).then((todo) => {
+				response.writeHead(201, CONTENT_TYPE_JSON);
+				response.end(JSON.stringify(todo));
+			})
+			.catch((err) => {
+				response.writeHead(400, CONTENT_TYPE_JSON);
+				response.end(JSON.stringify(err));
+			});
+		})
+		.catch((err) => {
+			response.writeHead(400, CONTENT_TYPE_JSON);
+			response.end(JSON.stringify({ message: "Invalid request body", err }));
 		});
 	}
 
 	// update - /api/todo/ : PUT
 	else if (request.url == "/api/todo" && request.method === "PUT") {
-		let body = "";
-		request
-			.on("data", (chunk) => {
-				console.log(chunk.toString());
-				body += chunk.toString();
+		getRequestBody(request).then((todoData) => {
+			todo.updateTodo(todoData).then((todo) => {
+				response.writeHead(200, CONTENT_TYPE_JSON);
+				response.end(JSON.stringify(todo));
 			})
-			.on("end", () => {
-				const { id, title, completed, date } = JSON.parse(body);
-				const todo = { id: parseInt(id), title, completed, date };
-				new Todo()
-					.updateTodo(todo)
-					.then((todo) => {
-						response.writeHead(200, CONTENT_TYPE_JSON);
-						response.end(JSON.stringify(todo));
-					})
-					.catch((err) => {
-						response.writeHead(404, CONTENT_TYPE_JSON);
-						response.end(JSON.stringify(err));
-					});
+			.catch((err) => {
+				response.writeHead(404, CONTENT_TYPE_JSON);
+				response.end(JSON.stringify(err));
 			});
+		})
+		.catch((err) => {
+			response.writeHead(400, CONTENT_TYPE_JSON);
+			response.end(JSON.stringify({ message: "Invalid request body", err }));
+		});
 	}
 
 	// delete - /api/todo/:id : DELETE

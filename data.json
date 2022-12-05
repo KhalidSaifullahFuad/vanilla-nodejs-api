@@ -3,12 +3,24 @@
 		"id": 1,
 		"title": "Learn JavaScript",
 		"completed": true,
-		"date": "28/11/2022"
+		"date": "2022-11-28"
 	},
 	{
 		"id": 2,
 		"title": "Learn NodeJS",
 		"completed": true,
-		"date": "04/12/2022"
+		"date": "2022-12-04"
+	},
+	{
+		"id": 6,
+		"title": "Learn React",
+		"completed": false,
+		"date": "2022-12-05"
+	},
+	{
+		"id": 7,
+		"title": "Learn Unit Testing",
+		"completed": false,
+		"date": "2022-12-05"
 	}
 ]
